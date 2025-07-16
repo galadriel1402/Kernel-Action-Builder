@@ -1,0 +1,68 @@
+name: Kernel Builder
+
+on:
+  workflow_dispatch:
+    inputs:
+      KERNEL_REPO:
+        description: 'Kernel Repository'
+        required: true
+        default: 'https://github.com/galadriel-at-22-00/kernel_xiaomi_sm6150.git'
+      KERNEL_BRANCH:
+        description: 'Kernel Branch'
+        required: true
+        default: 'fifteen'
+
+jobs:
+  build:
+    name: Build Kernel by ${{ github.actor }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            bc bison build-essential ccache curl flex g++-multilib gcc-multilib \
+            git git-lfs gnupg gperf imagemagick lib32readline-dev lib32z1-dev \
+            libdw-dev libelf-dev lz4 libsdl1.2-dev libssl-dev libxml2 libxml2-utils \
+            lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
+
+      - name: Clone kernel source
+        env:
+          GH_TOKEN: ${{ secrets.KERNEL }}
+        run: |
+          REPO_URL="${{ inputs.KERNEL_REPO }}"
+          AUTH_REPO_URL="${REPO_URL/https:\/\//https:\/\/${GH_TOKEN}@}"
+          git clone --depth=1 --branch "${{ inputs.KERNEL_BRANCH }}" --recursive "$AUTH_REPO_URL" kernel
+
+      - name: Install clang toolchain
+        run: |
+          mkdir -p /home/runner/linux-x86
+          cd /home/runner/linux-x86
+
+          echo "Downloading clang-r547379..."
+          curl -L \
+            "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/62cdcefa89e31af2d72c366e8b5ef8db84caea62/clang-r547379.tar.gz" \
+            -o clang.tar.gz
+
+          mkdir clang-prebuilt
+          tar -xf clang.tar.gz -C clang-prebuilt
+
+      - name: Execute build script
+        run: |
+          cd kernel
+          bash ksun_susfs.sh
+          bash build.sh "/home/runner/linux-x86/clang-prebuilt"
+
+      - name: Publish release artifact
+        uses: softprops/action-gh-release@v1
+        with:
+          files: kernel/Maiar*.zip
+          name: "Build ${{ github.run_id }}"
+          tag_name: build-${{ github.run_id }}
+          body: |
+            **Device:** sweet  
+            **Branch:** ${{ inputs.KERNEL_BRANCH }}  
+            **Clang:** clang-r547379

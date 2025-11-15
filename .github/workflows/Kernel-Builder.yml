@@ -65,8 +65,8 @@ jobs:
       - name: Upload Kernel Zip
         uses: softprops/action-gh-release@v1
         with:
-          files: kernel/perf*.zip
-          name: galadriel for sweet - ${{ github.run_id }}
+          files: kernel/Maiar*.zip
+          name: 1.0
           tag_name: build-${{ github.run_id }}
           body: |
             **Device:** sweet  

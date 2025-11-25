@@ -60,6 +60,7 @@ jobs:
       - name: Run build.sh
         run: |
           cd kernel
+          chmod +x build.sh
           bash build.sh "/home/runner/linux-x86/clang-prebuilt/${{ env.CLANG_VER }}" "${{ inputs.ANDROID_VERSION }}"
 
       - name: Upload Kernel Zip

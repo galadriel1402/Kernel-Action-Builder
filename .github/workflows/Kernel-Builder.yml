@@ -6,15 +6,11 @@ on:
       KERNEL_REPO:
         description: 'Kernel Repository'
         required: true
-        default: 'https://github.com/galadriel-at-22-00/kernel_xiaomi_sm6150.git'
+        default: 'https://github.com/Lothlorien-playground/android_kernel_common_perf-4.14.git'
       KERNEL_BRANCH:
         description: 'Kernel Branch'
         required: true
-        default: 'fifteen'
-      ANDROID_VERSION:
-        description: 'Android Version (A15 or A16)'
-        required: true
-        default: 'A16'
+        default: 'Maiar-VNL'
 
 jobs:
   build:
@@ -41,36 +37,34 @@ jobs:
           AUTH_REPO_URL="${REPO_URL/https:\/\//https:\/\/${GH_TOKEN}@}"
           git clone --depth=1 --branch "${{ inputs.KERNEL_BRANCH }}" --recursive "$AUTH_REPO_URL" kernel
 
-      - name: Clone Clang Toolchain
+      - name: Download Clang Toolchain (r584948)
         run: |
-          mkdir -p /home/runner/linux-x86
-          cd /home/runner/linux-x86
-          git clone --depth=1 --filter=blob:none --sparse https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 clang-prebuilt
-          cd clang-prebuilt
-          if [[ "${{ inputs.ANDROID_VERSION }}" == "A15" ]]; then
-            CLANG_VER=clang-r536225
-          elif [[ "${{ inputs.ANDROID_VERSION }}" == "A16" ]]; then
-            CLANG_VER=clang-r547379
-          else
-            echo "Invalid ANDROID_VERSION"; exit 1
-          fi
-          git sparse-checkout set $CLANG_VER
-          echo "CLANG_VER=$CLANG_VER" >> $GITHUB_ENV
+          mkdir -p /home/runner/linux-x86/clang
+          cd /home/runner/linux-x86/clang
+
+          echo "Downloading Clang r584948..."
+          curl -L \
+            "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/167e11df8c330bced88cdf5808f61f41d9eab330/clang-r584948.tar.gz" \
+            -o clang.tar.gz
+
+          echo "Extracting..."
+          tar -xf clang.tar.gz
+          rm clang.tar.gz
+
+          echo "CLANG_PATH=/home/runner/linux-x86/clang" >> $GITHUB_ENV
 
       - name: Run build.sh
         run: |
           cd kernel
-          chmod +x build.sh
-          bash build.sh "/home/runner/linux-x86/clang-prebuilt/${{ env.CLANG_VER }}" "${{ inputs.ANDROID_VERSION }}"
+          bash build.sh "${{ env.CLANG_PATH }}"
 
       - name: Upload Kernel Zip
         uses: softprops/action-gh-release@v1
         with:
-          files: kernel/Maiar*.zip
-          name: 1.0
+          files: kernel/Maiar-*.zip
+          name: Maiar Kernel - ${{ github.run_id }}
           tag_name: build-${{ github.run_id }}
           body: |
             **Device:** sweet  
             **Branch:** ${{ inputs.KERNEL_BRANCH }}  
-            **Android Version:** ${{ inputs.ANDROID_VERSION }}  
-            **Clang Version:** ${{ env.CLANG_VER }}
+            **Clang Version:** clang-r584948

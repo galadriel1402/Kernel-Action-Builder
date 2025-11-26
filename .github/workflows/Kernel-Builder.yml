@@ -37,14 +37,14 @@ jobs:
           AUTH_REPO_URL="${REPO_URL/https:\/\//https:\/\/${GH_TOKEN}@}"
           git clone --depth=1 --branch "${{ inputs.KERNEL_BRANCH }}" --recursive "$AUTH_REPO_URL" kernel
 
-      - name: Download Clang Toolchain (r584948)
+      - name: Download Clang Toolchain (Clang 21 - r574158)
         run: |
           mkdir -p /home/runner/linux-x86/clang
           cd /home/runner/linux-x86/clang
 
-          echo "Downloading Clang r584948..."
+          echo "Downloading Clang 21 (clang-r574158)..."
           curl -L \
-            "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/167e11df8c330bced88cdf5808f61f41d9eab330/clang-r584948.tar.gz" \
+            "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/ebcc6c3bef363bc539ea39f45b6abae1dce6ff1a/clang-r574158.tar.gz" \
             -o clang.tar.gz
 
           echo "Extracting..."
@@ -65,6 +65,6 @@ jobs:
           name: Maiar Kernel - ${{ github.run_id }}
           tag_name: build-${{ github.run_id }}
           body: |
-            **Device:** sweet  
-            **Branch:** ${{ inputs.KERNEL_BRANCH }}  
-            **Clang Version:** clang-r584948
+            **Device:** sweet
+            **Branch:** ${{ inputs.KERNEL_BRANCH }}
+            **Clang Version:** clang-r574158 (Clang 21)

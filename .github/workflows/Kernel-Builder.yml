@@ -53,8 +53,6 @@ jobs:
       - name: Run build.sh
         run: |
           cd kernel
-          git config user.name "galadriel1402"
-          git config user.email "galadriel1402@gmail.com"
           bash ksun_susfs.sh && bash build.sh "${{ env.CLANG_PATH }}"
 
       - name: Upload Kernel Zip

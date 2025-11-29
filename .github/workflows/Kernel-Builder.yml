@@ -53,6 +53,7 @@ jobs:
       - name: Run build.sh
         run: |
           cd kernel
+          export DEVICE=sweet
           bash build.sh "${{ env.CLANG_PATH }}"
 
       - name: Upload Kernel Zip

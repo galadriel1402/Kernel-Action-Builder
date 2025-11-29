@@ -29,6 +29,11 @@ jobs:
             libdw-dev libelf-dev lz4 libsdl1.2-dev libssl-dev libxml2 libxml2-utils \
             lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
 
+      - name: Set Git identity
+        run: |
+          git config user.name "galadriel1402"
+          git config user.email "galadriel1402@gmail.com"
+
       - name: Clone Kernel Repo
         env:
           GH_TOKEN: ${{ secrets.KERNEL }}

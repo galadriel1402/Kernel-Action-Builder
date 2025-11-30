@@ -53,7 +53,7 @@ jobs:
       - name: Run build.sh
         run: |
           cd kernel
-          bash ksun_susfs.sh && bash build.sh "${{ env.CLANG_PATH }}"
+          bash build.sh "${{ env.CLANG_PATH }}"
 
       - name: Upload Kernel Zip
         uses: softprops/action-gh-release@v1
